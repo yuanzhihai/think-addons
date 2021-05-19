@@ -2,7 +2,7 @@
 The ThinkPHP 6 Addons Package
 
 ## 安装
-> composer require zzstudio/think-addons
+> composer require yzh52521/think-addons
 
 ## 配置
 
@@ -25,7 +25,7 @@ php think addons:config
     // 当关闭自动获取配置时需要手动配置hooks信息
     'hooks' => [
 	    // 可以定义多个钩子
-        'testhook'=>'test' // 键为钩子名称，用于在业务中自定义钩子处理，值为实现该钩子的插件，
+        'test_hook'=>'test' // 键为钩子名称，用于在业务中自定义钩子处理，值为实现该钩子的插件，
 					// 多个插件可以用数组也可以用逗号分割
 	],
     'route' => [],
@@ -41,7 +41,7 @@ return [
     // 当关闭自动获取配置时需要手动配置hooks信息
     'hooks' => [
         // 可以定义多个钩子
-        'testhook'=>'test' // 键为钩子名称，用于在业务中自定义钩子处理，值为实现该钩子的插件，
+        'test_hook'=>'test' // 键为钩子名称，用于在业务中自定义钩子处理，值为实现该钩子的插件，
                     // 多个插件可以用数组也可以用逗号分割
     ],
     'route' => [],

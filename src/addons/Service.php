@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace think\addons;
@@ -24,9 +25,11 @@ class Service extends \think\Service
     {
         $this->addons_path = $this->getAddonsPath();
         // 加载系统语言包
-        Lang::load([
-            $this->app->getRootPath() . '/vendor/zzstudio/think-addons/src/lang/zh-cn.php'
-        ]);
+        Lang::load(
+            [
+                $this->app->getRootPath() . '/vendor/zzstudio/think-addons/src/lang/zh-cn.php'
+            ]
+        );
         // 自动载入插件
         $this->autoload();
         // 加载插件事件
@@ -39,57 +42,67 @@ class Service extends \think\Service
 
     public function boot()
     {
-        $this->registerRoutes(function (Route $route) {
-            // 路由脚本
-            $execute = '\\think\\addons\\Route@execute';
+        $this->registerRoutes(
+            function (Route $route) {
+                // 路由脚本
+                $execute = '\\think\\addons\\Route@execute';
 
-            // 注册插件公共中间件
-            if (is_file($this->app->addons->getAddonsPath() . 'middleware.php')) {
-                $this->app->middleware->import(include $this->app->addons->getAddonsPath() . 'middleware.php', 'route');
-            }
-
-            // 注册控制器路由
-            $route->rule("addons/:addon/:controller/:action$", $execute)->middleware(Addons::class);
-            // 自定义路由
-            $routes = (array) Config::get('addons.route', []);
-            foreach ($routes as $key => $val) {
-                if (!$val) {
-                    continue;
+                // 注册插件公共中间件
+                if (is_file($this->app->addons->getAddonsPath() . 'middleware.php')) {
+                    $this->app->middleware->import(
+                        include $this->app->addons->getAddonsPath() . 'middleware.php',
+                        'route'
+                    );
                 }
-                if (is_array($val)) {
-                    $domain = $val['domain'];
-                    $rules = [];
-                    foreach ($val['rule'] as $k => $rule) {
-                        [$addon, $controller, $action] = explode('/', $rule);
-                        $rules[$k] = [
-                            'addons'        => $addon,
-                            'controller'    => $controller,
-                            'action'        => $action,
-                            'indomain'      => 1,
-                        ];
+
+                // 注册控制器路由
+                $route->rule("addons/:addon/:controller/:action$", $execute)->middleware(Addons::class);
+                // 自定义路由
+                $routes = (array)Config::get('addons.route', []);
+                foreach ($routes as $key => $val) {
+                    if (!$val) {
+                        continue;
                     }
-                    $route->domain($domain, function () use ($rules, $route, $execute) {
-                        // 动态注册域名的路由规则
-                        foreach ($rules as $k => $rule) {
-                            $route->rule($k, $execute)
-                                ->name($k)
-                                ->completeMatch(true)
-                                ->append($rule);
+                    if (is_array($val)) {
+                        $domain = $val['domain'];
+                        $rules  = [];
+                        foreach ($val['rule'] as $k => $rule) {
+                            [$addon, $controller, $action] = explode('/', $rule);
+                            $rules[$k] = [
+                                'addons'     => $addon,
+                                'controller' => $controller,
+                                'action'     => $action,
+                                'indomain'   => 1,
+                            ];
                         }
-                    });
-                } else {
-                    list($addon, $controller, $action) = explode('/', $val);
-                    $route->rule($key, $execute)
-                        ->name($key)
-                        ->completeMatch(true)
-                        ->append([
-                            'addons' => $addon,
-                            'controller' => $controller,
-                            'action' => $action
-                        ]);
+                        $route->domain(
+                            $domain,
+                            function () use ($rules, $route, $execute) {
+                                // 动态注册域名的路由规则
+                                foreach ($rules as $k => $rule) {
+                                    $route->rule($k, $execute)
+                                        ->name($k)
+                                        ->completeMatch(true)
+                                        ->append($rule);
+                                }
+                            }
+                        );
+                    } else {
+                        [$addon, $controller, $action] = explode('/', $val);
+                        $route->rule($key, $execute)
+                            ->name($key)
+                            ->completeMatch(true)
+                            ->append(
+                                [
+                                    'addons'     => $addon,
+                                    'controller' => $controller,
+                                    'action'     => $action
+                                ]
+                            );
+                    }
                 }
             }
-        });
+        );
     }
 
     /**
@@ -99,17 +112,22 @@ class Service extends \think\Service
     {
         $hooks = $this->app->isDebug() ? [] : Cache::get('hooks', []);
         if (empty($hooks)) {
-            $hooks = (array) Config::get('addons.hooks', []);
+            $hooks = (array)Config::get('addons.hooks', []);
             // 初始化钩子
             foreach ($hooks as $key => $values) {
                 if (is_string($values)) {
                     $values = explode(',', $values);
                 } else {
-                    $values = (array) $values;
+                    $values = (array)$values;
                 }
-                $hooks[$key] = array_filter(array_map(function ($v) use ($key) {
-                    return [get_addons_class($v), $key];
-                }, $values));
+                $hooks[$key] = array_filter(
+                    array_map(
+                        function ($v) use ($key) {
+                            return [get_addons_class($v), $key];
+                        },
+                        $values
+                    )
+                );
             }
             Cache::set('hooks', $hooks);
         }
@@ -128,7 +146,7 @@ class Service extends \think\Service
     private function loadService()
     {
         $results = scandir($this->addons_path);
-        $bind = [];
+        $bind    = [];
         foreach ($results as $name) {
             if ($name === '.' or $name === '..') {
                 continue;
@@ -221,7 +239,7 @@ class Service extends \think\Service
      */
     public function getAddonsConfig()
     {
-        $name = $this->app->request->addon;
+        $name  = $this->app->request->addon;
         $addon = get_addons_instance($name);
         if (!$addon) {
             return [];

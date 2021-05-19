@@ -9,7 +9,7 @@ use think\helper\{
 
 \think\Console::starting(function (\think\Console $console) {
     $console->addCommands([
-        'addons:config' => '\\think\\addons\\command\\SendConfig'
+        'addons:config' => '\\think\\addons\\command\\AddonsConfig'
     ]);
 });
 
